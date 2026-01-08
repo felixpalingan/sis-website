@@ -100,4 +100,3 @@ Selain fitur unggulan di atas, aplikasi ini mencakup modul manajemen yang kompre
 | **Siswa** | `dewanto` | `student123` |
 
 ---
-*Proyek ini dikembangkan oleh Felix Bariq sebagai portofolio Fullstack Web Development.*
