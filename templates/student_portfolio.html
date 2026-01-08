@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block title %}My Portfolio - SIS{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1><i class="fas fa-chart-line"></i> My Learning Portfolio</h1>
+    <p>Track your progress and achievements</p>
+    <div class="form-actions" style="margin-top: -50px; justify-content: flex-end;">
+         <a href="{{ url_for('print_student_portfolio', siswa_id=student.id) }}" target="_blank" class="btn btn-secondary">
+            <i class="fas fa-print"></i> Cetak Laporan
+        </a>
+    </div>
+</div>
+{% if monthly_records %}
+    {% for month, records in monthly_records.items() %}
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header">
+            <h3><i class="fas fa-calendar-alt"></i> {{ month }}</h3>
+        </div>
+        <div style="padding: 20px;">
+        {% for record in records %}
+        <div class="record-item" style="padding: 15px; border-left: 4px solid #764ba2; margin-bottom: 15px; background: #f8f9fa;">
+            <div class="record-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div class="record-date"><strong>Tanggal:</strong> {{ record.tanggal }}</div>
+                <div class="record-class"><strong>Kelas:</strong> {{ record.nama_kelas }}</div>
+            </div>
+            <div class="assessment-grid">
+                <div class="assessment-item">
+                    <strong><i class="fas fa-user-check"></i> Kehadiran:</strong> 
+                    <span class="badge">{{ record.kehadiran_mutu }}</span> {{ record.kehadiran }}
+                </div>
+                <div class="assessment-item">
+                    <strong><i class="fas fa-user-clock"></i> Kedisiplinan:</strong> 
+                    <span class="badge">{{ record.kedisiplinan_mutu }}</span> {{ record.kedisiplinan }}
+                </div>
+                <div class="assessment-item">
+                    <strong><i class="fas fa-book-open"></i> Materi & Kreativitas:</strong> 
+                    <span class="badge">{{ record.materi_kreativitas_mutu }}</span> {{ record.materi_kreativitas }}
+                </div>
+                <div class="assessment-item">
+                    <strong><i class="fas fa-users"></i> Kerjasama:</strong> 
+                    <span class="badge">{{ record.kerjasama_mutu }}</span> {{ record.kerjasama }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="card"><div class="text-center" style="padding: 40px;"><p>Belum Ada Data Portofolio</p></div></div>
+{% endif %}
+<style>
+    .badge { background-color: #764ba2; color: white; padding: 3px 8px; font-size: 12px; border-radius: 10px; font-weight: bold; }
+    .assessment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .assessment-item { background: white; padding: 10px; border-radius: 4px; }
+</style>
+{% endblock %}

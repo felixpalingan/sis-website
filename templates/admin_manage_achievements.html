@@ -1,0 +1,229 @@
+{% extends "layout.html" %}
+{% block title %}Manage Achievements - {{ kelas.nama_kelas }} - Admin - SIS{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1><i class="fas fa-trophy"></i> Kelola Capaian Pembelajaran</h1>
+    <p>{{ kelas.nama_kelas }} ({{ kelas.kode_kelas }}) - {{ kelas.nama_program }}</p>
+</div>
+<!-- Add Achievement Form -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-plus"></i> Tambah Capaian Baru</h3>
+    </div>
+    <form method="POST" action="{{ url_for('admin_add_achievement', kelas_id=kelas.id) }}">
+        <div class="form-group">
+            <label for="nama_capaian">Nama Capaian *</label>
+            <input type="text" class="form-control" id="nama_capaian" name="nama_capaian" required 
+                   placeholder="Contoh: Membuat robot sederhana">
+        </div>
+        <div class="form-group">
+            <label for="deskripsi">Deskripsi Capaian</label>
+            <textarea class="form-control" id="deskripsi" name="deskripsi" rows="3" 
+                      placeholder="Deskripsi detail tentang capaian ini..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Target Pertemuan</label>
+            <p style="color: #666; font-size: 14px; margin-bottom: 10px;">
+                Pilih pertemuan ke berapa capaian ini akan dibahas
+            </p>
+            <div class="meeting-checkboxes">
+                {% for i in range(1, 21) %}
+                <label class="meeting-checkbox">
+                    <input type="checkbox" name="pertemuan" value="{{ i }}">
+                    <span class="checkbox-custom"></span>
+                    Pertemuan {{ i }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="form-actions">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Tambah Capaian
+            </button>
+        </div>
+    </form>
+</div>
+<!-- Existing Achievements -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-list"></i> Capaian yang Ada</h3>
+    </div>
+    <div class="achievements-list">
+        {% for achievement in achievements %}
+        <div class="achievement-item">
+            <div class="achievement-header">
+                <h4><i class="fas fa-star"></i> {{ achievement.nama_capaian }}</h4>
+                <div class="achievement-meetings">
+                    {% if achievement.pertemuan_list %}
+                        {% for pertemuan in achievement.pertemuan_list.split(',') %}
+                        <span class="meeting-badge">Pertemuan {{ pertemuan }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="no-meetings">Belum ada jadwal</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="achievement-description">
+                <p>{{ achievement.deskripsi or 'Tidak ada deskripsi' }}</p>
+            </div>
+            <div class="achievement-actions">
+                <button class="btn btn-sm btn-warning">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="confirmDelete('{{ achievement.id }}', '{{ achievement.nama_capaian }}')">
+                    <i class="fas fa-trash"></i> Hapus
+                </button>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-trophy" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></i>
+            <h3>Belum ada capaian</h3>
+            <p>Tambahkan capaian pembelajaran untuk kelas ini</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<style>
+.meeting-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 6px;
+    background: #f9f9f9;
+}
+.meeting-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+.meeting-checkbox:hover {
+    background: #e9ecef;
+}
+.meeting-checkbox input[type="checkbox"] {
+    display: none;
+}
+.checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ddd;
+    border-radius: 3px;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+.meeting-checkbox input[type="checkbox"]:checked + .checkbox-custom {
+    background: #764ba2;
+    border-color: #764ba2;
+}
+.meeting-checkbox input[type="checkbox"]:checked + .checkbox-custom:after {
+    content: "✓";
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+.achievements-list {
+    padding: 20px;
+}
+.achievement-item {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.achievement-header {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.achievement-header h4 {
+    color: #764ba2;
+    margin: 0;
+    flex: 1;
+}
+.achievement-meetings {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+.meeting-badge {
+    background: #764ba2;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.no-meetings {
+    color: #999;
+    font-style: italic;
+    font-size: 14px;
+}
+.achievement-description {
+    padding: 15px 20px;
+}
+.achievement-description p {
+    margin: 0;
+    color: #666;
+    line-height: 1.5;
+}
+.achievement-actions {
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+}
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+.empty-state h3 {
+    margin: 0 0 10px 0;
+    color: #999;
+}
+@media (max-width: 768px) {
+    .achievement-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .meeting-checkboxes {
+        grid-template-columns: 1fr;
+        max-height: 150px;
+    }
+    .achievement-actions {
+        flex-wrap: wrap;
+    }
+}
+</style>
+<script>
+function confirmDelete(achievementId, achievementName) {
+    if (confirm('Apakah Anda yakin ingin menghapus capaian "' + achievementName + '"?')) {
+        // In a real implementation, you would make an AJAX call to delete
+        alert('Fungsi hapus akan diimplementasikan');
+    }
+}
+// Auto-select meeting checkboxes based on pattern
+document.addEventListener('DOMContentLoaded', function() {
+    // You can add logic here to suggest which meetings to select
+    // based on the achievement name or description
+});
+</script>
+{% endblock %}

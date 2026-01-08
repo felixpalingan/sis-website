@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+{% block title %}Pengelompokan Kelas{% endblock %}
+{% block content %}
+    <div class="content-header">
+        <h1><i class="fas fa-users-cog"></i> Pengelompokan Kelas</h1>
+        <p>Buat kelas baru, tentukan program, jadwal, dan pilih siswa yang akan bergabung.</p>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3>Formulir Kelas Baru</h3>
+        </div>
+        <form method="POST" style="padding: 20px;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="kode_kelas">Kode Kelas</label>
+                    <input type="text" id="kode_kelas" name="kode_kelas" class="form-control" required placeholder="Contoh: K-ROB-PAGI-A">
+                </div>
+                <div class="form-group">
+                    <label for="nama_kelas">Nama Kelas</label>
+                    <input type="text" id="nama_kelas" name="nama_kelas" class="form-control" required placeholder="Contoh: Robotik Pagi Grup A">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="program_id">Program</label>
+                    <select id="program_id" name="program_id" class="form-control" required>
+                        <option value="" disabled selected>-- Pilih Program --</option>
+                        {% for program in program_list %}
+                            <option value="{{ program.id }}">{{ program.nama_program }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="pengajar_id">Pengajar</label>
+                    <select id="pengajar_id" name="pengajar_id" class="form-control" required>
+                        <option value="" disabled selected>-- Pilih Pengajar --</option>
+                        {% for pengajar in pengajar_list %}
+                            <option value="{{ pengajar.id }}">{{ pengajar.nama_pengajar }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="sekolah_id">Asal Sekolah (Target)</label>
+                <select id="sekolah_id" name="sekolah_id" class="form-control" required>
+                    <option value="" disabled selected>-- Pilih Sekolah --</option>
+                    {% for sekolah in sekolah_list %}
+                        <option value="{{ sekolah.id }}">{{ sekolah.nama_sekolah }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Jadwal Belajar</label>
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Tanggal Mulai</label>
+                        <input type="date" name="tanggal_mulai" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Hari</label>
+                        <select name="hari" class="form-control" required>
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                            <option value="Sabtu">Sabtu</option>
+                            <option value="Minggu">Minggu</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" style="margin-top:10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Waktu Mulai</label>
+                        <input type="time" name="waktu_mulai" class="form-control" required>
+                    </div>
+                     <div class="form-group" style="flex: 1;">
+                        <label>Waktu Akhir</label>
+                        <input type="time" name="waktu_akhir" class="form-control" required>
+                    </div>
+                </div>
+            </div>
+            <hr style="margin: 30px 0;">
+            <h3>Pilih Siswa untuk Kelas Ini</h3>
+            <div class="checkbox-grid" style="margin-top: 15px; border: 1px solid #ddd; padding: 20px; border-radius: 5px; max-height: 300px; overflow-y: auto;">
+                {% for siswa in siswa_list %}
+                <label class="checkbox-label" style="display: flex; align-items: center; gap: 10px; padding: 5px;">
+                    <input type="checkbox" name="siswa_ids" value="{{ siswa.id }}" style="width: 18px; height: 18px;">
+                    {{ siswa.nama_siswa }}
+                </label>
+                {% else %}
+                <p>Belum ada data siswa. Silakan isi data siswa terlebih dahulu.</p>
+                {% endfor %}
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Buat Kelas
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

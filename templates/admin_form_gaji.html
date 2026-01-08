@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block title %}Buat Slip Gaji{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1><i class="fas fa-dollar-sign"></i> Slip Penggajian (Pengisian Admin)</h1>
+</div>
+<div class="card">
+    <form method="POST">
+        <input type="hidden" name="pengajar_id" value="{{ pengajar.id }}">
+        <input type="hidden" name="periode" value="{{ periode }}">
+        <div style="padding: 20px;">
+            <p><strong>Nama:</strong> {{ pengajar.nama_pengajar }}</p>
+            <p><strong>Periode:</strong> {{ periode }}</p>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Keterangan</th>
+                    <th>Nominal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Transport Pengajaran</td>
+                    <td><input type="number" name="transport_pengajaran" id="transport" class="form-control nominal" value="{{ transport_value }}"></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Tunjangan Lain-lain</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td style="padding-left: 30px;">- Marketing</td>
+                    <td><input type="number" name="tunjangan_marketing" id="marketing" class="form-control nominal" value="0"></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td style="padding-left: 30px;">- Tugas Tambahan</td>
+                    <td><input type="number" name="tunjangan_tugas_tambahan" id="tugas" class="form-control nominal" value="0"></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td style="padding-left: 30px;">- Lain-lain</td>
+                    <td><input type="number" name="tunjangan_lain_lain" id="lain" class="form-control nominal" value="0"></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2" style="text-align: right;"><strong>Total</strong></td>
+                    <td><strong id="total">0</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+        <div class="form-actions">
+            <a href="{{ url_for('admin_laporan_gaji') }}" class="btn btn-secondary"><i class="fas fa-times"></i> Batal</a>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-print"></i> Simpan & Cetak</button>
+        </div>
+    </form>
+</div>
+<script>
+    const nominalInputs = document.querySelectorAll('.nominal');
+    const totalEl = document.getElementById('total');
+    function calculateTotal() {
+        let total = 0;
+        nominalInputs.forEach(input => {
+            total += parseInt(input.value) || 0;
+        });
+        totalEl.textContent = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(total);
+    }
+    nominalInputs.forEach(input => input.addEventListener('input', calculateTotal));
+    // Calculate total on page load
+    calculateTotal();
+</script>
+{% endblock %}

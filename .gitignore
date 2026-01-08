@@ -1,0 +1,12 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Database (Wajib exclude biar ga numpuk history)
+*.db
+sis.db
+
+# Environment variables & Virtual Env
+.env
+venv/
+env/

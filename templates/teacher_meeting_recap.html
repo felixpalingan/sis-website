@@ -1,0 +1,280 @@
+{% extends "layout.html" %}
+{% block title %}Meeting Recap - {{ teacher.nama_pengajar }} - SIS{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1><i class="fas fa-calendar-check"></i> Rekap Pertemuan Mengajar</h1>
+    <p>{{ teacher.nama_pengajar }} - Untuk perhitungan gaji</p>
+</div>
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #28a745;">
+            <i class="fas fa-calendar"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ total_meetings }}</h3>
+            <p>Total Pertemuan</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #764ba2;">
+            <i class="fas fa-calendar-week"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ current_month_meetings }}</h3>
+            <p>Bulan Ini</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #17a2b8;">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ monthly_summary|length }}</h3>
+            <p>Bulan Aktif</p>
+        </div>
+    </div>
+</div>
+<!-- Monthly Summary -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-chart-bar"></i> Ringkasan per Bulan</h3>
+    </div>
+    <div class="monthly-summary">
+        {% for month, count in monthly_summary.items() %}
+        <div class="month-item">
+            <span class="month-label">{{ month }}</span>
+            <div class="month-bar">
+                <div class="bar-fill" style="width: {{ (count / (monthly_summary.values() | max)) * 100 }}%"></div>
+                <span class="count-label">{{ count }} pertemuan</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<!-- Detailed Meeting List -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-list"></i> Detail Pertemuan</h3>
+        <p style="margin: 0; color: #666;">Daftar lengkap semua pertemuan yang telah dilakukan</p>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Kelas</th>
+                    <th>Program</th>
+                    <th>Sekolah</th>
+                    <th>Waktu Upload</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for meeting in meetings %}
+                <tr>
+                    <td>
+                        <strong>{{ meeting.tanggal }}</strong>
+                    </td>
+                    <td>
+                        {{ meeting.nama_kelas }}<br>
+                        <small class="text-muted">{{ meeting.kode_kelas }}</small>
+                    </td>
+                    <td>
+                        <span class="program-badge">{{ meeting.nama_program }}</span>
+                    </td>
+                    <td>{{ meeting.nama_sekolah or 'Umum' }}</td>
+                    <td>
+                        <small class="text-muted">{{ meeting.waktu_upload }}</small>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="showPhoto({{ meeting.sesi_id }})">
+                            <i class="fas fa-image"></i> Lihat Foto
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <i class="fas fa-calendar-times" style="font-size: 48px; color: #ddd; margin: 20px;"></i><br>
+                        Belum ada pertemuan yang tercatat
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Photo Modal -->
+<div id="photoModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Foto Selfie Kehadiran</h3>
+        <div id="photoContainer">
+            <img id="modalPhoto" style="max-width: 100%; border-radius: 8px;">
+        </div>
+    </div>
+</div>
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+}
+.stat-content h3 {
+    margin: 0;
+    font-size: 2em;
+    font-weight: bold;
+    color: #333;
+}
+.stat-content p {
+    margin: 5px 0 0 0;
+    color: #666;
+}
+.monthly-summary {
+    padding: 20px;
+}
+.month-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 15px;
+}
+.month-label {
+    min-width: 80px;
+    font-weight: 500;
+}
+.month-bar {
+    flex: 1;
+    height: 30px;
+    background: #f0f0f0;
+    border-radius: 15px;
+    position: relative;
+    overflow: hidden;
+}
+.bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
+    border-radius: 15px;
+    transition: width 0.5s ease;
+}
+.count-label {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+}
+.program-badge {
+    background: #764ba2;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 80%;
+    max-height: 80%;
+    overflow: auto;
+    position: relative;
+}
+.close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #999;
+}
+.close:hover {
+    color: #333;
+}
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .month-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .month-bar {
+        width: 100%;
+    }
+}
+</style>
+<script>
+const modal = document.getElementById('photoModal');
+const modalPhoto = document.getElementById('modalPhoto');
+function showPhoto(sesiId) {
+    // Tampilkan modal dengan pesan loading
+    modal.style.display = 'flex';
+    modalPhoto.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⏳</text></svg>'; // Loading indicator
+    // Panggil API untuk mengambil data foto
+    fetch(`/api/sesi-foto/${sesiId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.foto_selfie) {
+                modalPhoto.src = data.foto_selfie;
+            } else {
+                alert('Gagal memuat foto: ' + data.error);
+                modalPhoto.src = ''; // Kosongkan jika error
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching photo:', error);
+            alert('Terjadi kesalahan saat mengambil foto.');
+            closeModal();
+        });
+}
+function closeModal() {
+    modal.style.display = 'none';
+}
+// Event listener untuk tombol close dan klik di luar modal
+document.querySelector('.close').addEventListener('click', closeModal);
+window.addEventListener('click', function(event) {
+    if (event.target == modal) {
+        closeModal();
+    }
+});
+</script>
+{% endblock %}

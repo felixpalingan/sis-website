@@ -1,0 +1,169 @@
+{% extends "layout.html" %}
+{% block title %}Absensi - {{ kelas_info.nama_kelas }}{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1><i class="fas fa-user-check"></i> Absensi & Penilaian</h1>
+    <p>{{ kelas_info.nama_kelas }} ({{ kelas_info.kode_kelas }}) - {{ kelas_info.nama_program }}</p>
+</div>
+<!-- Informasi Sesi Pembelajaran (Hanya Tampil) -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-book-open"></i> Sesi Pembelajaran Hari Ini</h3>
+    </div>
+    <div style="padding: 20px;">
+        <div class="info-display">
+            <p><strong>Tanggal:</strong> {{ tanggal_hari_ini }}</p>
+            <p><strong>Pertemuan ke:</strong> {{ pertemuan_ke }}</p>
+            <p><strong>Materi:</strong></p>
+            <blockquote style="margin: 10px 0; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #6c757d;">
+                {{ detail_materi }}
+            </blockquote>
+        </div>
+    </div>
+</div>
+<form method="POST" id="attendanceForm">
+    <!-- Hidden Inputs -->
+    <input type="hidden" name="tanggal" value="{{ tanggal_hari_ini }}">
+    <input type="hidden" name="materi_pembelajaran" value="{{ detail_materi }}">
+    <input type="hidden" id="selfie_data" name="selfie_data">
+    <!-- Foto Selfie Pengajar -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-camera"></i> Foto Selfie Pengajar (Wajib)</h3>
+        </div>
+        <div class="selfie-section">
+            <video id="video" autoplay style="display: none; max-width: 400px; border-radius: 8px;"></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            <div id="photoPreview" class="photo-preview" style="display: none; margin-top: 20px;">
+                <img id="capturedPhoto" alt="Captured Photo" style="max-width: 300px; border-radius: 8px;">
+            </div>
+            <div class="selfie-controls" style="margin-top: 15px;">
+                <button type="button" id="startCamera" class="btn btn-secondary"><i class="fas fa-camera"></i> Buka Kamera</button>
+                <button type="button" id="takePhoto" class="btn btn-primary" style="display: none;"><i class="fas fa-camera-retro"></i> Ambil Foto</button>
+                <button type="button" id="retakePhoto" class="btn btn-secondary" style="display: none;"><i class="fas fa-redo"></i> Ambil Ulang</button>
+            </div>
+        </div>
+    </div>
+    <!-- Penilaian Siswa -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-users"></i> Penilaian Siswa</h3>
+        </div>
+        <div style="padding: 20px;">
+            {% for siswa in siswa_di_kelas %}
+            <input type="hidden" name="siswa_id" value="{{ siswa.id }}">
+            <div class="student-assessment-card">
+                <h4>{{ siswa.nama_siswa }}</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="kehadiran_{{ siswa.id }}">Kehadiran</label>
+                        <select id="kehadiran_{{ siswa.id }}" name="kehadiran_{{ siswa.id }}" class="form-control">
+                            <option value="A">A (Hadir)</option>
+                            <option value="B">B (Hadir Sebagian/Terlambat)</option>
+                            <option value="C">C (Tidak Hadir)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="kedisiplinan_{{ siswa.id }}">Kedisiplinan</label>
+                        <select id="kedisiplinan_{{ siswa.id }}" name="kedisiplinan_{{ siswa.id }}" class="form-control">
+                            <option value="A">A (Sangat Baik)</option>
+                            <option value="B" selected>B (Baik)</option>
+                            <option value="C">C (Cukup)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="materi_kreativitas_{{ siswa.id }}">Materi & Kreativitas</label>
+                        <select id="materi_kreativitas_{{ siswa.id }}" name="materi_kreativitas_{{ siswa.id }}" class="form-control">
+                            <option value="A">A (Sangat Baik)</option>
+                            <option value="B" selected>B (Baik)</option>
+                            <option value="C">C (Cukup)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="kerjasama_{{ siswa.id }}">Kerjasama</label>
+                        <select id="kerjasama_{{ siswa.id }}" name="kerjasama_{{ siswa.id }}" class="form-control">
+                            <option value="A">A (Sangat Baik)</option>
+                            <option value="B" selected>B (Baik)</option>
+                            <option value="C">C (Cukup)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="form-actions">
+        <a href="{{ url_for('pilih_kelas_absensi') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Batal
+        </a>
+        <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+            <i class="fas fa-save"></i> Simpan Absensi
+        </button>
+    </div>
+</form>
+<style>
+    .student-assessment-card {
+        padding: 15px;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        background-color: #f9f9f9;
+    }
+    .student-assessment-card h4 {
+        margin-top: 0;
+        color: #764ba2;
+    }
+</style>
+<script>
+    // (JavaScript untuk kamera Anda tidak perlu diubah)
+    let stream = null;
+    document.getElementById('startCamera').addEventListener('click', async function() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const video = document.getElementById('video');
+            video.srcObject = stream;
+            video.style.display = 'block';
+            this.style.display = 'none';
+            document.getElementById('takePhoto').style.display = 'inline-block';
+        } catch (err) {
+            alert('Error accessing camera: ' + err.message);
+        }
+    });
+    document.getElementById('takePhoto').addEventListener('click', function() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+        document.getElementById('selfie_data').value = dataURL;
+        document.getElementById('capturedPhoto').src = dataURL;
+        document.getElementById('photoPreview').style.display = 'block';
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+        video.style.display = 'none';
+        this.style.display = 'none';
+        document.getElementById('retakePhoto').style.display = 'inline-block';
+        document.getElementById('submitBtn').disabled = false;
+    });
+    document.getElementById('retakePhoto').addEventListener('click', function() {
+        document.getElementById('photoPreview').style.display = 'none';
+        document.getElementById('selfie_data').value = '';
+        document.getElementById('startCamera').style.display = 'inline-block';
+        this.style.display = 'none';
+        document.getElementById('submitBtn').disabled = true;
+    });
+    document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+        if (!document.getElementById('selfie_data').value) {
+            e.preventDefault();
+            alert('Foto selfie wajib diupload sebagai bukti kehadiran mengajar!');
+            return false;
+        }
+    });
+</script>
+{% endblock %}

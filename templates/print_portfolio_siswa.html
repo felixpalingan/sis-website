@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Laporan Perkembangan - {{ student.nama_siswa }}</title>
+    <style>
+        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; }
+        .container { width: 90%; margin: 0 auto; }
+        .header, .footer { text-align: center; }
+        .student-info { margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; vertical-align: top; }
+        th { background-color: #f2f2f2; text-align: center; }
+        .no-print { position: fixed; top: 10px; right: 10px; }
+        @media print { .no-print { display: none; } body { margin: 20px; } }
+    </style>
+</head>
+<body>
+    <div class="no-print"><button onclick="window.print()">Cetak Laporan</button></div>
+    <div class="container">
+        <div class="header">
+            <h1 style="font-size: 14pt; margin: 0;">SMART-TECH ACADEMY</h1>
+            <h2 style="font-size: 13pt; margin: 0; font-weight: normal;">Laporan Perkembangan Siswa<br>Ekskul Robotika</h2>
+        </div>
+        <div class="student-info">
+            <strong>Nama Siswa:</strong> {{ student.nama_siswa }}<br>
+            <strong>Kelas:</strong> {{ student.nama_kelas or 'Belum ada kelas' }}
+        </div>
+        {% for month, records in monthly_records.items() %}
+            <h3 style="text-align: center;">Periode: {{ month }}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">No</th>
+                        <th style="width: 15%;">Tanggal</th>
+                        <th style="width: 25%;">Materi</th>
+                        <th style="width: 15%;">Penilaian Kategori</th>
+                        <th style="width: 8%;">H. Mutu</th>
+                        <th>Deskripsi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr>
+                        <td rowspan="4" style="text-align: center;">{{ loop.index }}</td>
+                        <td rowspan="4" style="text-align: center;">{{ record.tanggal_formatted }}</td>
+                        <td rowspan="4">{{ record.materi_pembelajaran or 'Tidak ada detail materi' }}</td>
+                        <td>Kehadiran</td>
+                        <td style="text-align: center;">{{ record.kehadiran_mutu }}</td>
+                        <td>{{ record.kehadiran }}</td>
+                    </tr>
+                    <tr>
+                        <td>Kedisiplinan</td>
+                        <td style="text-align: center;">{{ record.kedisiplinan_mutu }}</td>
+                        <td>{{ record.kedisiplinan }}</td>
+                    </tr>
+                    <tr>
+                        <td>Materi & Kreatifitas</td>
+                        <td style="text-align: center;">{{ record.materi_kreativitas_mutu }}</td>
+                        <td>{{ record.materi_kreativitas }}</td>
+                    </tr>
+                    <tr>
+                        <td>Kerjasama</td>
+                        <td style="text-align: center;">{{ record.kerjasama_mutu }}</td>
+                        <td>{{ record.kerjasama }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+        <div class="footer" style="margin-top: 40px; text-align: right;">
+            <p>Bandar Lampung, {{ report_date }}</p>
+            <p>Pimpinan Lembaga,</p>
+            <br><br><br>
+            <p><strong><u>Ir. Iwan Purwanto., S.Kom., MTI., MOS., IPM.</u></strong></p>
+        </div>
+    </div>
+</body>
+</html>

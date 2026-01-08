@@ -1,0 +1,361 @@
+{% extends "layout.html" %}
+{% block title %}Manage Groups - {{ kelas.nama_kelas }} - Admin - SIS{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1><i class="fas fa-layer-group"></i> Kelola Kelompok Siswa</h1>
+    <p>{{ kelas.nama_kelas }} ({{ kelas.kode_kelas }})</p>
+</div>
+<!-- Add Group Form -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-plus"></i> Tambah Kelompok Baru</h3>
+    </div>
+    <form method="POST" action="{{ url_for('admin_add_group', kelas_id=kelas.id) }}">
+        <div class="form-group">
+            <label for="nama_kelompok">Nama Kelompok *</label>
+            <input type="text" class="form-control" id="nama_kelompok" name="nama_kelompok" required 
+                   placeholder="Contoh: Kelompok A, Tim Robot, etc.">
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Tambah Kelompok
+            </button>
+        </div>
+    </form>
+</div>
+<!-- Existing Groups -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-users"></i> Kelompok yang Ada</h3>
+        <p style="margin: 0; color: #666;">Kelola pembagian siswa dalam kelompok (7-15 siswa per kelompok)</p>
+    </div>
+    <div class="groups-grid">
+        {% for group in groups %}
+        <div class="group-card">
+            <div class="group-header">
+                <h4><i class="fas fa-layer-group"></i> {{ group.nama_kelompok }}</h4>
+                <div class="group-count">
+                    <span class="count-badge {% if group.jumlah_siswa < 7 %}warning{% elif group.jumlah_siswa > 15 %}danger{% else %}success{% endif %}">
+                        {{ group.jumlah_siswa }} siswa
+                    </span>
+                </div>
+            </div>
+            <div class="group-actions">
+                <button class="btn btn-sm btn-primary" onclick="showAssignModal('{{ group.id }}', '{{ group.nama_kelompok }}')">
+                    <i class="fas fa-user-plus"></i> Tambah Siswa
+                </button>
+                <button class="btn btn-sm btn-info" onclick="viewGroupMembers('{{ group.id }}')">
+                    <i class="fas fa-eye"></i> Lihat Anggota
+                </button>
+                <a href="{{ url_for('admin_manage_achievements', kelas_id=kelas.id) }}" class="btn btn-sm btn-success">
+                    <i class="fas fa-trophy"></i> Capaian
+                </a>
+            </div>
+            {% if group.jumlah_siswa < 7 %}
+            <div class="group-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                Kurang dari 7 siswa (minimum)
+            </div>
+            {% elif group.jumlah_siswa > 15 %}
+            <div class="group-warning danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                Lebih dari 15 siswa (maksimum)
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-layer-group" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></i>
+            <h3>Belum ada kelompok</h3>
+            <p>Tambahkan kelompok untuk mengorganisir siswa</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<!-- Unassigned Students -->
+{% if unassigned_students %}
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-user-clock"></i> Siswa Belum Tergabung</h3>
+        <p style="margin: 0; color: #666;">{{ unassigned_students|length }} siswa belum tergabung dalam kelompok</p>
+    </div>
+    <div class="unassigned-list">
+        {% for student in unassigned_students %}
+        <div class="student-item">
+            <div class="student-info">
+                <i class="fas fa-user"></i>
+                <span>{{ student.nama_siswa }}</span>
+                <small class="text-muted">{{ student.id }}</small>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="showAssignModal(null, null, '{{ student.id }}', '{{ student.nama_siswa }}')">
+                <i class="fas fa-plus"></i> Masukkan ke Kelompok
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+<!-- Assignment Modal -->
+<div id="assignModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Masukkan Siswa ke Kelompok</h3>
+            <span class="close">&times;</span>
+        </div>
+        <form method="POST" action="{{ url_for('admin_assign_student_to_group') }}">
+            <input type="hidden" name="kelas_id" value="{{ kelas.id }}">
+            <input type="hidden" id="modal_siswa_id" name="siswa_id">
+            <input type="hidden" id="modal_kelompok_id" name="kelompok_id">
+            <div class="form-group">
+                <label>Siswa yang akan dimasukkan:</label>
+                <div id="selectedStudent" class="selected-item">
+                    <!-- Will be filled by JavaScript -->
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="kelompok_select">Pilih Kelompok:</label>
+                <select class="form-control" id="kelompok_select" name="kelompok_id" required>
+                    <option value="">-- Pilih Kelompok --</option>
+                    {% for group in groups %}
+                    <option value="{{ group.id }}" data-count="{{ group.jumlah_siswa }}">
+                        {{ group.nama_kelompok }} ({{ group.jumlah_siswa }}/15 siswa)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                    <i class="fas fa-times"></i> Batal
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Masukkan ke Kelompok
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="form-actions" style="margin-top: 30px;">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+    </a>
+</div>
+<style>
+.groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+.group-card {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+.group-header {
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.group-header h4 {
+    margin: 0;
+    color: #764ba2;
+}
+.count-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: white;
+}
+.count-badge.success {
+    background: #28a745;
+}
+.count-badge.warning {
+    background: #ffc107;
+    color: #333;
+}
+.count-badge.danger {
+    background: #dc3545;
+}
+.group-actions {
+    padding: 15px 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.group-warning {
+    padding: 10px 20px;
+    background: #fff3cd;
+    color: #856404;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.group-warning.danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+.unassigned-list {
+    padding: 20px;
+}
+.student-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    background: white;
+}
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.student-info i {
+    color: #764ba2;
+}
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background: white;
+    padding: 0;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    overflow: hidden;
+}
+.modal-header {
+    padding: 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-header h3 {
+    margin: 0;
+    color: #764ba2;
+}
+.close {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #999;
+}
+.close:hover {
+    color: #333;
+}
+.modal form {
+    padding: 20px;
+}
+.selected-item {
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+.empty-state h3 {
+    margin: 0 0 10px 0;
+    color: #999;
+}
+@media (max-width: 768px) {
+    .groups-grid {
+        grid-template-columns: 1fr;
+        padding: 10px;
+    }
+    .group-actions {
+        flex-direction: column;
+    }
+    .student-item {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    .modal-actions {
+        flex-direction: column;
+    }
+}
+</style>
+<script>
+function showAssignModal(groupId, groupName, studentId, studentName) {
+    const modal = document.getElementById('assignModal');
+    const title = document.getElementById('modalTitle');
+    const selectedStudent = document.getElementById('selectedStudent');
+    const siswaIdInput = document.getElementById('modal_siswa_id');
+    const kelompokIdInput = document.getElementById('modal_kelompok_id');
+    const kelompokSelect = document.getElementById('kelompok_select');
+    if (studentId && studentName) {
+        // Assigning specific student
+        title.textContent = `Masukkan ${studentName} ke Kelompok`;
+        selectedStudent.innerHTML = `<i class="fas fa-user"></i> ${studentName}`;
+        siswaIdInput.value = studentId;
+        kelompokSelect.removeAttribute('disabled');
+        kelompokSelect.value = '';
+    } else if (groupId && groupName) {
+        // Adding to specific group
+        title.textContent = `Tambah Siswa ke ${groupName}`;
+        selectedStudent.innerHTML = `<i class="fas fa-layer-group"></i> Target: ${groupName}`;
+        kelompokIdInput.value = groupId;
+        kelompokSelect.value = groupId;
+        kelompokSelect.setAttribute('disabled', 'disabled');
+    }
+    modal.style.display = 'flex';
+}
+function viewGroupMembers(groupId) {
+    // In a real implementation, this would show group members
+    alert('Fitur lihat anggota kelompok akan diimplementasikan');
+}
+function closeModal() {
+    document.getElementById('assignModal').style.display = 'none';
+}
+document.querySelector('.close').addEventListener('click', closeModal);
+window.addEventListener('click', function(event) {
+    if (event.target == document.getElementById('assignModal')) {
+        closeModal();
+    }
+});
+// Highlight groups that are full when selecting
+document.getElementById('kelompok_select').addEventListener('change', function() {
+    const selectedOption = this.selectedOptions[0];
+    if (selectedOption) {
+        const count = parseInt(selectedOption.dataset.count);
+        if (count >= 15) {
+            alert('Peringatan: Kelompok ini sudah mencapai kapasitas maksimum (15 siswa)');
+        }
+    }
+});
+</script>
+{% endblock %}

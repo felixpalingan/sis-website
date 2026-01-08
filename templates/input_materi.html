@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block title %}Input Data Materi{% endblock %}
+{% block content %}
+    <div class="content-header">
+        <h1><i class="fas fa-book-open"></i> Input Data Materi</h1>
+        <p>Gunakan salah satu metode di bawah untuk memasukkan materi pembelajaran.</p>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3>Opsi 1: Input Manual</h3>
+        </div>
+        <form method="POST" action="{{ url_for('input_materi') }}" style="padding: 20px;">
+            <div class="form-group">
+                <label for="program">Program</label>
+                <select id="program" name="program" class="form-control" required>
+                    <option value="" disabled selected>-- Pilih Program --</option>
+                    <option value="Desain Grafis">Desain Grafis</option>
+                    <option value="Bahasa Inggris">Bahasa Inggris</option>
+                    <option value="Robotik">Robotik</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="pertemuan_ke">Pertemuan ke-</label>
+                <input type="number" id="pertemuan_ke" name="pertemuan_ke" class="form-control" required min="1" placeholder="Contoh: 1">
+            </div>
+            <div class="form-group">
+                <label for="detail_materi">Materi</label>
+                <textarea id="detail_materi" name="detail_materi" class="form-control" rows="8" required placeholder="Jelaskan materi yang akan diajarkan pada pertemuan ini..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Simpan Data Materi
+                </button>
+            </div>
+        </form>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3>Opsi 2: Upload via CSV</h3>
+        </div>
+        <form action="{{ url_for('upload_csv', tipe='materi') }}" method="post" enctype="multipart/form-data" style="padding: 20px;">
+            <div class="form-group">
+                <label for="csv_file">Pilih File CSV</label>
+                <input type="file" id="csv_file" name="csv_file" class="form-control" accept=".csv" required>
+            </div>
+            <blockquote style="margin: 20px 0; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #6c757d;">
+                <strong>Format CSV:</strong> Pastikan file CSV Anda memiliki 3 kolom dengan urutan: <code>program</code>, <code>pertemuan_ke</code>, <code>detail_materi</code>. Baris pertama (header) akan dilewati.
+            </blockquote>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-upload"></i> Upload File
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

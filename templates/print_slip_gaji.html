@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Slip Gaji - {{ slip.nama_pengajar }}</title>
+    <style>
+        body { font-family: sans-serif; }
+        .container { width: 80%; margin: auto; border: 1px solid #ccc; padding: 20px; }
+        h1 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        .signatures { margin-top: 50px; display: flex; justify-content: space-between; }
+        .signature-block { text-align: center; }
+        .no-print { position: fixed; top: 10px; right: 10px; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="no-print"><button onclick="window.print()">Cetak</button></div>
+    <div class="container">
+        <h1>Slip Penggajian</h1>
+        <p><strong>Nama:</strong> {{ slip.nama_pengajar }}</p>
+        <p><strong>Periode:</strong> {{ slip.periode }}</p>
+        <table>
+            <thead><tr><th>No</th><th>Keterangan</th><th>Nominal</th></tr></thead>
+            <tbody>
+                <tr><td>1</td><td>Transport Pengajaran</td><td>{{ slip.transport_pengajaran | to_rupiah }}</td></tr>
+                <tr><td>2</td><td>Tunjangan Lain-lain</td><td></td></tr>
+                <tr><td></td><td style="padding-left: 30px;">- Marketing</td><td>{{ slip.tunjangan_marketing | to_rupiah }}</td></tr>
+                <tr><td></td><td style="padding-left: 30px;">- Tugas Tambahan</td><td>{{ slip.tunjangan_tugas_tambahan | to_rupiah }}</td></tr>
+                <tr><td></td><td style="padding-left: 30px;">- Lain-lain</td><td>{{ slip.tunjangan_lain_lain | to_rupiah }}</td></tr>
+            </tbody>
+            <tfoot>
+                <tr><td colspan="2" style="text-align: right;"><strong>Total</strong></td><td><strong>{{ slip.total_gaji | to_rupiah }}</strong></td></tr>
+            </tfoot>
+        </table>
+        <div class="signatures">
+            <div class="signature-block"><p>Admin,</p><br><br><p>(___________________)</p></div>
+            <div class="signature-block"><p>Pengajar,</p><br><br><p>({{ slip.nama_pengajar }})</p></div>
+        </div>
+    </div>
+</body>
+</html>

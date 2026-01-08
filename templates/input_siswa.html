@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% block title %}Input Data Siswa{% endblock %}
+{% block content %}
+    <div class="content-header">
+        <h1><i class="fas fa-child"></i> Input Data Siswa</h1>
+        <p>Gunakan salah satu metode di bawah untuk mendaftarkan siswa baru.</p>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3>Opsi 1: Input Manual</h3>
+        </div>
+        <form method="POST" action="{{ url_for('input_siswa') }}" style="padding: 20px;">
+            <div class="form-group">
+                <label for="nama_siswa">Nama Siswa</label>
+                <input type="text" id="nama_siswa" name="nama_siswa" class="form-control" required placeholder="Contoh: Dewanto">
+            </div>
+            <div class="form-group">
+                <label for="kelas_tingkat">Kelas (Tingkat)</label>
+                <input type="text" id="kelas_tingkat" name="kelas_tingkat" class="form-control" required placeholder="Contoh: 4 SD, 5 SD">
+            </div>
+            <div class="form-group">
+                <label for="sekolah_id">Asal Sekolah</label>
+                <select id="sekolah_id" name="sekolah_id" class="form-control" required>
+                    <option value="" disabled selected>-- Pilih Asal Sekolah --</option>
+                    {% for sekolah in sekolah_list %}
+                        <option value="{{ sekolah.id }}">{{ sekolah.nama_sekolah }} ({{ sekolah.kode_sekolah }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="program">Program yang Diikuti</label>
+                <select id="program" name="program" class="form-control" required>
+                    <option value="" disabled selected>-- Pilih Program --</option>
+                    <option value="Desain Grafis">Desain Grafis</option>
+                    <option value="Bahasa Inggris">Bahasa Inggris</option>
+                    <option value="Robotik">Robotik</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Simpan Data Siswa
+                </button>
+            </div>
+        </form>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3>Opsi 2: Upload via CSV</h3>
+        </div>
+        <form action="{{ url_for('upload_csv', tipe='siswa') }}" method="post" enctype="multipart/form-data" style="padding: 20px;">
+            <div class="form-group">
+                <label for="csv_file">Pilih File CSV</label>
+                <input type="file" id="csv_file" name="csv_file" class="form-control" accept=".csv" required>
+            </div>
+            <blockquote style="margin: 20px 0; padding: 10px; background-color: #f8f9fa; border-left: 4px solid #6c757d;">
+                <strong>Format CSV:</strong> Pastikan file CSV Anda memiliki 4 kolom dengan urutan: <code>nama_siswa</code>, <code>kelas_tingkat</code>, <code>kode_sekolah</code>, <code>program</code>. Baris pertama (header) akan dilewati.
+            </blockquote>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-upload"></i> Upload File
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

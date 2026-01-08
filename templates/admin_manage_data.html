@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% block title %}Manage {{ tipe.title() }} - SIS{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1><i class="fas fa-database"></i> Manage {{ tipe.title() }}</h1>
+    <p>View and manage {{ tipe }} data</p>
+</div>
+<div class="card">
+    <div class="card-header">
+        <div class="flex justify-between align-center">
+            <h3>{{ tipe.title() }} List</h3>
+            <button class="btn btn-primary" onclick="alert('Add new {{ tipe }} feature coming soon!')">
+                <i class="fas fa-plus"></i> Add New {{ tipe.title() }}
+            </button>
+        </div>
+    </div>
+    {% if data %}
+        <table class="table">
+            <thead>
+                <tr>
+                    {% for column in columns %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    {% if tipe == 'sekolah' %}
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.kode_sekolah }}</td>
+                        <td>{{ item.nama_sekolah }}</td>
+                        <td>{{ item.alamat }}</td>
+                        <td>
+                            <span class="badge {{ 'badge-success' if item.jenis_sekolah == 'Muslim' else 'badge-info' }}">
+                                {{ item.jenis_sekolah }}
+                            </span>
+                        </td>
+                    {% elif tipe == 'pengajar' %}
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.nama_pengajar }}</td>
+                        <td>{{ item.username if item.username else 'No account' }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" onclick="alert('Edit feature coming soon!')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </td>
+                    {% elif tipe == 'program' %}
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.nama_program }}</td>
+                    {% elif tipe == 'siswa' %}
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.nama_siswa }}</td>
+                        <td>{{ item.nama_sekolah }}</td>
+                        <td>{{ item.username if item.username else 'No account' }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="text-center" style="padding: 40px;">
+            <i class="fas fa-database" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></i>
+            <p>No {{ tipe }} data found.</p>
+        </div>
+    {% endif %}
+</div>
+<style>
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+.badge-info {
+    background-color: #17a2b8;
+    color: white;
+}
+</style>
+{% endblock %}

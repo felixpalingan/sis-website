@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Student Information System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-graduation-cap"></i> SIS</h3>
+                <div class="user-info">
+                    Welcome, {{ session.username }}<br>
+                    <small>{{ session.role.title() }}</small>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                {% if session.role == 'admin' %}
+                    <li><a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li><a href="{{ url_for('admin_manage_data', tipe='sekolah') }}"><i class="fas fa-school"></i> Data Sekolah</a></li>
+                    <li><a href="{{ url_for('admin_manage_data', tipe='pengajar') }}"><i class="fas fa-chalkboard-teacher"></i> Data Pengajar</a></li>
+                    <li><a href="{{ url_for('admin_manage_data', tipe='siswa') }}"><i class="fas fa-users"></i> Data Siswa</a></li>
+                    <li><a href="{{ url_for('admin_manage_data', tipe='program') }}"><i class="fas fa-book"></i> Data Program</a></li>
+                    <li style="padding: 10px 20px; color: rgba(255,255,255,0.5); font-size: 14px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        INPUT DATA BARU
+                    </li>
+                    <li><a href="{{ url_for('input_sekolah') }}"><i class="fas fa-plus-circle"></i> Input Sekolah</a></li>
+                    <li><a href="{{ url_for('input_pengajar') }}"><i class="fas fa-plus-circle"></i> Input Pengajar</a></li>
+                    <li><a href="{{ url_for('input_siswa') }}"><i class="fas fa-plus-circle"></i> Input Siswa</a></li>
+                    <li><a href="{{ url_for('input_materi') }}"><i class="fas fa-plus-circle"></i> Input Materi</a></li>
+                    <li><a href="{{ url_for('admin_jadwal_pengajar') }}"><i class="fas fa-calendar-alt"></i> Input Jadwal Pengajar</a></li>
+                    <li><a href="{{ url_for('admin_kelola_sesi') }}"><i class="fas fa-users-cog"></i> Kelola Sesi & Absensi</a></li>
+                    <li><a href="{{ url_for('pengelompokan_kelas') }}"><i class="fas fa-users-cog"></i> Buat & Kelompokkan Kelas</a></li>
+                    <li style="padding: 10px 20px; color: rgba(255,255,255,0.5); font-size: 14px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        LAPORAN
+                    </li>
+                    <li><a href="{{ url_for('admin_teacher_meetings') }}"><i class="fas fa-chart-bar"></i> Laporan Absen Pengajar</a></li>
+                    <li><a href="{{ url_for('admin_laporan_gaji') }}"><i class="fas fa-file-invoice-dollar"></i> Laporan & Gaji</a></li>
+                {% elif session.role == 'pengajar' %}
+                    <li><a href="{{ url_for('teacher_dashboard') }}"><i class="fas fa-tachometer-alt"></i> My Classes</a></li>
+                    <li><a href="{{ url_for('pilih_kelas_absensi') }}"><i class="fas fa-user-check"></i> Absensi Kelas</a></li>
+                    <li><a href="{{ url_for('teacher_meeting_recap') }}"><i class="fas fa-calendar-check"></i> Meeting Recap</a></li>
+                {% elif session.role == 'siswa' %}
+                    <li><a href="{{ url_for('student_portfolio') }}"><i class="fas fa-chart-line"></i> My Portfolio</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>

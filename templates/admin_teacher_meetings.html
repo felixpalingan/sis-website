@@ -1,0 +1,320 @@
+{% extends "layout.html" %}
+{% block title %}Teacher Meeting Statistics - Admin - SIS{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1><i class="fas fa-chart-bar"></i> Statistik Pertemuan Pengajar</h1>
+    <p>Data untuk perhitungan gaji dan monitoring kehadiran mengajar</p>
+</div>
+<!-- Teacher Statistics Overview -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-users"></i> Ringkasan Pertemuan per Pengajar</h3>
+        <p style="margin: 0; color: #666;">Klik pada pengajar untuk melihat detail pertemuan</p>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Pengajar</th>
+                    <th>Username</th>
+                    <th>Total Pertemuan</th>
+                    <th>Bulan Ini</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for teacher in teacher_stats %}
+                <tr {% if selected_teacher == teacher.id|string %}class="selected-row"{% endif %}>
+                    <td>
+                        <strong>{{ teacher.nama_pengajar }}</strong>
+                    </td>
+                    <td>{{ teacher.username }}</td>
+                    <td>
+                        <span class="badge badge-primary">{{ teacher.total_pertemuan }}</span>
+                    </td>
+                    <td>
+                        <span class="badge badge-success">{{ teacher.pertemuan_bulan_ini }}</span>
+                    </td>
+                    <td>
+                        <a href="?teacher_id={{ teacher.id }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> Lihat Detail
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">
+                        <i class="fas fa-user-times" style="font-size: 48px; color: #ddd; margin: 20px;"></i><br>
+                        Belum ada data pengajar
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Detailed Teacher Meetings -->
+{% if selected_teacher and teacher_meetings %}
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-calendar-alt"></i> Detail Pertemuan Pengajar</h3>
+        <div class="header-actions">
+            <a href="{{ url_for('admin_teacher_meetings') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Kembali ke Ringkasan
+            </a>
+        </div>
+    </div>
+    <div class="meeting-summary">
+        <div class="summary-stats">
+            <div class="stat-item">
+                <i class="fas fa-calendar"></i>
+                <span>{{ teacher_meetings|length }} Pertemuan</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-calendar-week"></i>
+                <span>{{ meetings_this_month }} Bulan Ini</span>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Kelas</th>
+                    <th>Program</th>
+                    <th>Waktu Upload</th>
+                    <th>Foto Bukti</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for meeting in teacher_meetings %}
+                <tr>
+                    <td>
+                        <strong>{{ meeting.tanggal }}</strong>
+                    </td>
+                    <td>
+                        {{ meeting.nama_kelas }}<br>
+                        <small class="text-muted">{{ meeting.kode_kelas }}</small>
+                    </td>
+                    <td>
+                        <span class="program-badge">{{ meeting.nama_program }}</span>
+                    </td>
+                    <td>
+                        <small>{{ meeting.waktu_upload }}</small>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="showPhoto('{{ meeting.id }}')">
+                            <i class="fas fa-image"></i> Lihat Foto
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Monthly Breakdown -->
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fas fa-chart-line"></i> Breakdown per Bulan</h3>
+    </div>
+    <div class="monthly-breakdown">
+        {% set monthly_count = {} %}
+        {% for meeting in teacher_meetings %}
+            {% set month = meeting.tanggal[:7] %}
+            {% if monthly_count.update({month: monthly_count.get(month, 0) + 1}) %}{% endif %}
+        {% endfor %}
+        {% for month, count in monthly_count.items() %}
+        <div class="month-stat">
+            <div class="month-label">{{ month }}</div>
+            <div class="month-count">{{ count }} pertemuan</div>
+            <div class="month-bar">
+                <div class="bar-fill" style="width: {{ (count / (monthly_count.values() | max)) * 100 }}%"></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+<!-- Photo Modal -->
+<div id="photoModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Foto Selfie Kehadiran Mengajar</h3>
+        <div id="photoContainer">
+            <img id="modalPhoto" style="max-width: 100%; border-radius: 8px;">
+        </div>
+        <div class="photo-info">
+            <p><strong>Catatan:</strong> Foto ini diambil sebagai bukti kehadiran pengajar saat mengajar</p>
+        </div>
+    </div>
+</div>
+<style>
+.selected-row {
+    background-color: #f0f8ff;
+    border-left: 4px solid #764ba2;
+}
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.header-actions {
+    margin-left: auto;
+}
+.badge {
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.badge-primary {
+    background: #764ba2;
+    color: white;
+}
+.badge-success {
+    background: #28a745;
+    color: white;
+}
+.meeting-summary {
+    padding: 20px;
+    background: #f8f9fa;
+    margin-bottom: 0;
+}
+.summary-stats {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #666;
+    font-weight: 500;
+}
+.stat-item i {
+    color: #764ba2;
+}
+.program-badge {
+    background: #764ba2;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.monthly-breakdown {
+    padding: 20px;
+}
+.month-stat {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 15px;
+}
+.month-label {
+    min-width: 80px;
+    font-weight: 500;
+}
+.month-count {
+    min-width: 120px;
+    color: #666;
+    font-size: 14px;
+}
+.month-bar {
+    flex: 1;
+    height: 20px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 80%;
+    max-height: 80%;
+    overflow: auto;
+    position: relative;
+}
+.close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #999;
+}
+.close:hover {
+    color: #333;
+}
+.photo-info {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border-left: 4px solid #764ba2;
+}
+.photo-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+@media (max-width: 768px) {
+    .card-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .summary-stats {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .month-stat {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .month-bar {
+        width: 100%;
+    }
+}
+</style>
+<script>
+function showPhoto(meetingId) {
+    // In a real implementation, you would fetch the photo from the server
+    // For now, we'll show a placeholder
+    document.getElementById('photoModal').style.display = 'flex';
+    document.getElementById('modalPhoto').src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200"><rect width="300" height="200" fill="%23f0f0f0"/><text x="150" y="100" text-anchor="middle" fill="%23999" font-size="16">Foto Selfie Kehadiran</text></svg>';
+}
+document.querySelector('.close').addEventListener('click', function() {
+    document.getElementById('photoModal').style.display = 'none';
+});
+window.addEventListener('click', function(event) {
+    if (event.target == document.getElementById('photoModal')) {
+        document.getElementById('photoModal').style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block title %}Buat Sesi Manual{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1><i class="fas fa-calendar-plus"></i> Formulir Sesi Manual</h1>
+    <p>Untuk kelas: <strong>{{ kelas_info.nama_kelas }}</strong></p>
+</div>
+<div class="card">
+    <div class="card-header">
+        <h3>Detail Sesi</h3>
+    </div>
+    <form method="POST" style="padding: 20px;">
+        <div class="form-group">
+            <label for="tanggal">Tanggal Sesi</label>
+            <input type="date" id="tanggal" name="tanggal" class="form-control" value="{{ now.strftime('%Y-%m-%d') }}" required>
+        </div>
+        <div class="form-group">
+            <label>Pengajar Utama (Otomatis)</label>
+            <input type="text" class="form-control" value="{{ kelas_info.nama_pengajar }}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="pengajar_pengganti_id">Pengajar Pengganti (Opsional)</label>
+            <select id="pengajar_pengganti_id" name="pengajar_pengganti_id" class="form-control">
+                <option value="">-- Tidak Ada Pengganti --</option>
+                {% for pengajar in pengajar_list %}
+                    {% if pengajar.id != kelas_info.pengajar_id %}
+                    <option value="{{ pengajar.id }}">{{ pengajar.nama_pengajar }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="materi_pembelajaran">Materi Pembelajaran</label>
+            <textarea id="materi_pembelajaran" name="materi_pembelajaran" class="form-control" rows="4" required placeholder="Contoh: Pengenalan Robotika dan Komponen Dasar"></textarea>
+        </div>
+        <div class="form-actions">
+            <a href="{{ url_for('admin_kelola_sesi') }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Batal
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Simpan Sesi
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

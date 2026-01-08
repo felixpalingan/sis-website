@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block title %}Teacher Dashboard - SIS{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1><i class="fas fa-chalkboard-teacher"></i> My Classes</h1>
+    <p>Welcome, {{ session.username }}! Manage your classes and students.</p>
+</div>
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>{{ classes|length }}</h3>
+        <p><i class="fas fa-chalkboard"></i> My Classes</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ classes|sum(attribute='jumlah_siswa') }}</h3>
+        <p><i class="fas fa-users"></i> Total Students</p>
+    </div>
+</div>
+<div class="card-grid">
+    {% if classes %}
+        {% for class in classes %}
+        <div class="card">
+            <div class="card-header">
+                <h3>{{ class.nama_kelas }}</h3>
+                <p>{{ class.kode_kelas }} - {{ class.nama_program }}</p>
+            </div>
+            <div class="class-info">
+                <div class="info-item">
+                    <i class="fas fa-users"></i>
+                    <span>{{ class.jumlah_siswa }} students enrolled</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-book"></i>
+                    <span>{{ class.nama_program }}</span>
+                </div>
+            </div>
+            <div class="card-actions">
+                <a href="{{ url_for('absensi_kelas', kelas_id=class.id) }}" class="btn btn-primary">
+                    <i class="fas fa-clipboard-check"></i> Take Attendance
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            <div class="text-center" style="padding: 40px;">
+                <i class="fas fa-chalkboard" style="font-size: 48px; color: #ddd; margin-bottom: 20px;"></i>
+                <h3>No Classes Assigned</h3>
+                <p>You don't have any classes assigned yet. Please contact the administrator.</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+<style>
+.class-info {
+    margin: 20px 0;
+}
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: #666;
+}
+.info-item i {
+    width: 20px;
+    color: #764ba2;
+}
+.card-actions {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+</style>
+{% endblock %}

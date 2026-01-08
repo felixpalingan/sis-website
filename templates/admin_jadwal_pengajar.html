@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+{% block title %}Input Jadwal Pengajar{% endblock %}
+{% block content %}
+<div class="content-header">
+    <h1><i class="fas fa-calendar-alt"></i> Input Jadwal Pengajar</h1>
+    <p>Pilih pengajar untuk melihat dan mengatur jadwal kelas yang mereka ajar.</p>
+</div>
+<div class="card">
+    <div class="card-header">
+        <h3>Langkah 1: Pilih Pengajar</h3>
+    </div>
+    <form method="GET" action="{{ url_for('admin_jadwal_pengajar') }}" style="padding: 20px;">
+        <div class="form-group">
+            <label for="pengajar_id">Pilih Pengajar:</label>
+            <select id="pengajar_id" name="pengajar_id" class="form-control" onchange="this.form.submit()">
+                <option value="">-- Tampilkan Jadwal untuk Pengajar --</option>
+                {% for pengajar in pengajar_list %}
+                    <option value="{{ pengajar.id }}" {% if selected_pengajar and selected_pengajar.id == pengajar.id %}selected{% endif %}>
+                        {{ pengajar.nama_pengajar }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+</div>
+{% if selected_pengajar %}
+<div class="card">
+    <div class="card-header">
+        <h3>Langkah 2: Atur Jadwal untuk {{ selected_pengajar.nama_pengajar }}</h3>
+    </div>
+    <form method="POST" action="{{ url_for('admin_jadwal_pengajar') }}" style="padding: 20px;">
+        <input type="hidden" name="selected_pengajar_id" value="{{ selected_pengajar.id }}">
+        {% if kelas_list %}
+            {% for kelas in kelas_list %}
+            <input type="hidden" name="kelas_id" value="{{ kelas.id }}">
+            <div class="form-group" style="padding: 15px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 15px; background-color: #f9f9f9;">
+                <label><strong>Jadwal untuk: {{ kelas.nama_kelas }}</strong></label>
+                <div class="form-row" style="margin-top: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Tanggal Mulai Jadwal</label>
+                        <input type="date" name="tanggal_mulai_{{ kelas.id }}" class="form-control" value="{{ kelas.tanggal_mulai or '' }}" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Hari (Setiap Hari...)</label>
+                        <select name="hari_{{ kelas.id }}" class="form-control" required>
+                            {% set hari_list = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] %}
+                            {% for hari in hari_list %}
+                                <option value="{{ hari }}" {% if kelas.hari == hari %}selected{% endif %}>{{ hari }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" style="margin-top: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Waktu Mulai</label>
+                        <input type="time" name="waktu_mulai_{{ kelas.id }}" class="form-control" value="{{ kelas.waktu_mulai or '' }}" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Waktu Akhir</label>
+                        <input type="time" name="waktu_akhir_{{ kelas.id }}" class="form-control" value="{{ kelas.waktu_akhir or '' }}" required>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Simpan Semua Perubahan
+                </button>
+            </div>
+        {% else %}
+            <p style="text-align: center; color: #666;">Pengajar ini belum ditugaskan ke kelas manapun.</p>
+        {% endif %}
+    </form>
+</div>
+{% endif %}
+{% endblock %}
