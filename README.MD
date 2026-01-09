@@ -1,5 +1,12 @@
 # SIS (School Information System)
 
+![Status](https://img.shields.io/badge/Status-Complete-success?style=flat&logo=git)
+![Platform](https://img.shields.io/badge/Platform-Web_Application-blue?style=flat&logo=googlechrome)
+![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=flat&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Framework-Flask-000000?style=flat&logo=flask&logoColor=white)
+![Database](https://img.shields.io/badge/Database-SQLite-003B57?style=flat&logo=sqlite&logoColor=white)
+![Frontend](https://img.shields.io/badge/Frontend-HTML5_&_JS-E34F26?style=flat&logo=html5&logoColor=white)
+
 ![SIS Banner](screenshots/dashboard.png)
 *(Admin Dashboard: Pusat kontrol manajemen sekolah)*
 
